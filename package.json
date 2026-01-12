@@ -11,5 +11,8 @@
     "url": "git+https://github.com/DharmikDhameliya/fragments.git"
   },
   "author": "Dharmik Dhameliya",
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "prettier": "3.7.4"
+  }
 }
