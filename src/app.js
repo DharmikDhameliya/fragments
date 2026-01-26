@@ -11,6 +11,13 @@ app.use(express.json());
 
 // Initialize Passport for Cognito authentication
 app.use(passport());
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url} - Pending`);
+  res.on('finish', () => {
+    console.log(`${req.method} ${req.url} - ${res.statusCode}`);
+  });
+  next();
+});
 
 // Use our routes
 app.use('/', require('./routes'));
