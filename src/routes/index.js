@@ -1,3 +1,5 @@
+// src/routes/index.js
+
 const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../auth');
@@ -16,7 +18,7 @@ router.get('/', (req, res) => {
   res.status(200).json(
     createSuccessResponse({
       author,
-      // Replace 'YourGitHubUsername' with your actual GitHub username
+      // Replace 'DharmikDhameliya' with your actual GitHub username if different
       githubUrl: 'https://github.com/DharmikDhameliya/fragments',
       version,
     })
