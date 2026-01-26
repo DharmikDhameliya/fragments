@@ -1,28 +1,30 @@
-const passport = require('passport');
-const { Strategy, ExtractJwt } = require('passport-jwt');
-const jwksRsa = require('jwks-rsa');
+console.log('Loading AUTH system...');
+console.log('AWS_COGNITO_POOL_ID:', process.env.AWS_COGNITO_POOL_ID);
+console.log('AWS_COGNITO_CLIENT_ID:', process.env.AWS_COGNITO_CLIENT_ID);
+console.log('HTPASSWD_FILE:', process.env.HTPASSWD_FILE);
+console.log('NODE_ENV:', process.env.NODE_ENV);
+// src/auth/index.js
 
-module.exports = () => {
-  const opts = {
-    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-    secretOrKeyProvider: jwksRsa.passportJwtSecret({
-      cache: true,
-      rateLimit: true,
-      jwksRequestsPerMinute: 5,
-      jwksUri: `https://cognito-idp.${process.env.AWS_REGION}.amazonaws.com/${process.env.AWS_COGNITO_POOL_ID}/.well-known/jwks.json`,
-    }),
-    issuer: `https://cognito-idp.${process.env.AWS_REGION}.amazonaws.com/${process.env.AWS_COGNITO_POOL_ID}`,
-    algorithms: ['RS256'],
-  };
-
-  passport.use(
-    new Strategy(opts, (payload, done) => {
-      // This payload contains the user's info from the token
-      return done(null, payload);
-    })
+// Make sure our env isn't configured for both AWS Cognito and HTTP Basic Auth.
+if (
+  process.env.AWS_COGNITO_POOL_ID &&
+  process.env.AWS_COGNITO_CLIENT_ID &&
+  process.env.HTPASSWD_FILE
+) {
+  throw new Error(
+    'env contains configuration for both AWS Cognito and HTTP Basic Auth. Only one is allowed.'
   );
+}
 
-  return passport.initialize();
-};
-
-module.exports.authenticate = () => passport.authenticate('jwt', { session: false });
+// Prefer Amazon Cognito (production)
+if (process.env.AWS_COGNITO_POOL_ID && process.env.AWS_COGNITO_CLIENT_ID) {
+  module.exports = require('./cognito');
+}
+// Also allow for an .htpasswd file to be used, but not in production
+else if (process.env.HTPASSWD_FILE && process.env.NODE_ENV !== 'production') {
+  module.exports = require('./basic-auth');
+}
+// In all other cases, we need to stop now and fix our config
+else {
+  throw new Error('missing env vars: no authorization configuration found');
+}
