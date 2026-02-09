@@ -4,6 +4,7 @@ const passport = require('passport');
 const { Strategy, ExtractJwt } = require('passport-jwt');
 const jwksRsa = require('jwks-rsa');
 const logger = require('../logger');
+const authorize = require('./auth-middleware');
 
 // Validate required env vars
 if (
@@ -33,11 +34,12 @@ const opts = {
 module.exports.strategy = () => {
   passport.use(
     new Strategy(opts, (payload, done) => {
-      return done(null, payload);
+      // Return the email from the JWT payload
+      return done(null, payload.email);
     })
   );
   return passport.initialize();
 };
 
-// Export authenticate() function
-module.exports.authenticate = () => passport.authenticate('jwt', { session: false });
+// Updated to use the authorize middleware
+module.exports.authenticate = () => authorize('jwt');

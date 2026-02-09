@@ -5,6 +5,7 @@ const passport = require('passport');
 const authPassport = require('http-auth-passport');
 const path = require('path');
 const logger = require('../logger');
+const authorize = require('./auth-middleware');
 
 // Make sure the env var exists
 if (!process.env.HTPASSWD_FILE) {
@@ -25,4 +26,5 @@ module.exports.strategy = () => {
   return passport.initialize();
 };
 
-module.exports.authenticate = () => passport.authenticate('http', { session: false });
+// Updated to use the authorize middleware
+module.exports.authenticate = () => authorize('http');
