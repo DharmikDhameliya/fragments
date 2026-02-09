@@ -5,8 +5,10 @@ const app = require('../../src/app');
 
 describe('GET /v1/fragments', () => {
   // Helper to create a basic auth header
+  // MUST match tests/.htpasswd: test-user1@fragments-testing.com:password1
   const authHeader = () =>
-    `Basic ${Buffer.from('test-user1@fragments-testing.com:test-password1').toString('base64')}`;
+    `Basic ${Buffer.from('test-user1@fragments-testing.com:password1').toString('base64')}`;
+
   // 1. Unauthenticated request → 401
   test('unauthenticated requests are denied', () => request(app).get('/v1/fragments').expect(401));
 

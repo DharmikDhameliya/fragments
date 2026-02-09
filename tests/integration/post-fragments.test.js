@@ -2,10 +2,11 @@ const request = require('supertest');
 const app = require('../../src/app');
 
 describe('POST /v1/fragments', () => {
-  // Helper to create a basic auth header for 'user1@email.com:password123'
-  // Ensure this user exists in your tests/.htpasswd file!
+  // Helper to create a basic auth header
+  // MUST match tests/.htpasswd: test-user1@fragments-testing.com:password1
   const authHeader = () =>
-    `Basic ${Buffer.from('test-user1@fragments-testing.com:test-password1').toString('base64')}`;
+    `Basic ${Buffer.from('test-user1@fragments-testing.com:password1').toString('base64')}`;
+
   test('authenticated users can create a text fragment', async () => {
     const data = 'Hello Fragments!';
     const res = await request(app)
