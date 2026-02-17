@@ -1,0 +1,23 @@
+# Ignore documentation and IDE configs
+.github/
+.vscode/
+
+# Ignore testing and coverage
+coverage/
+tests/
+
+# IMPORTANT: Ignore local dependencies (Docker will install its own)
+node_modules/
+
+# Ignore environment secrets and git
+.env
+.git/
+.gitignore
+
+# Ignore build/config files not needed at runtime
+eslint.config.mjs
+.prettier*
+jest*
+
+# Exception: We actually need the .htpasswd file inside tests/ for Basic Auth
+!tests/.htpasswd
