@@ -1,37 +1,36 @@
-# Use node version 22.12.0 as the base image
-FROM node:22.12.0
+# Stage 0: Install dependencies
+FROM node:20-alpine AS dependencies
 
-# Metadata about the image
-LABEL maintainer="Your Name <your-email@example.com>"
-LABEL description="Fragments node.js microservice"
-
-# Environment variables
-# We default to use port 8080 in our service
-ENV PORT=8080
-
-# Reduce npm spam when installing within Docker
-ENV NPM_CONFIG_LOGLEVEL=warn
-
-# Disable colour when run inside Docker
-ENV NPM_CONFIG_COLOR=false
-
-# Use /app as our working directory
 WORKDIR /app
 
-# Copy the package.json and package-lock.json files into the working dir
+# Copy only package files first to leverage Docker cache
 COPY package*.json ./
 
-# Install node dependencies defined in package-lock.json
-RUN npm install
+# Install only production dependencies
+RUN npm ci --only=production
+
+#######################################################################
+
+# Stage 1: Final Runtime Image
+FROM node:20-alpine
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV PORT=8080
+
+WORKDIR /app
+
+# Copy dependencies from the previous stage
+COPY --from=dependencies /app/node_modules ./node_modules
 
 # Copy the rest of the source code
-COPY ./src ./src
+COPY . .
 
-# Copy the HTPASSWD file for basic auth (needed for later steps)
-COPY ./tests/.htpasswd ./tests/.htpasswd
+# Use a non-root user for security
+USER node
 
-# We run our service on port 8080
+# Expose the port
 EXPOSE 8080
 
-# Start the container by running our server
+# Start the application
 CMD ["npm", "start"]
