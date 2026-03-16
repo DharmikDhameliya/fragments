@@ -24,4 +24,47 @@ describe('GET /v1/fragments', () => {
     expect(res.body.status).toBe('ok');
     expect(Array.isArray(res.body.fragments)).toBe(true);
   });
+
+  // 4. expand=1 returns full metadata objects
+  test('authenticated users get expanded fragment metadata with ?expand=1', async () => {
+    // First create a fragment so we have something to expand
+    await request(app)
+      .post('/v1/fragments')
+      .set('Authorization', authHeader())
+      .set('Content-Type', 'text/plain')
+      .send(Buffer.from('hello world'));
+
+    const res = await request(app).get('/v1/fragments?expand=1').set('Authorization', authHeader());
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.status).toBe('ok');
+    expect(Array.isArray(res.body.fragments)).toBe(true);
+
+    // Each item should be a full metadata object, not just a string ID
+    if (res.body.fragments.length > 0) {
+      const fragment = res.body.fragments[0];
+      expect(fragment).toHaveProperty('id');
+      expect(fragment).toHaveProperty('ownerId');
+      expect(fragment).toHaveProperty('type');
+      expect(fragment).toHaveProperty('size');
+      expect(fragment).toHaveProperty('created');
+      expect(fragment).toHaveProperty('updated');
+    }
+  });
+
+  // 5. Without expand, returns array of ID strings
+  test('without expand, returns array of ID strings', async () => {
+    // First create a fragment
+    await request(app)
+      .post('/v1/fragments')
+      .set('Authorization', authHeader())
+      .set('Content-Type', 'text/plain')
+      .send(Buffer.from('hello'));
+
+    const res = await request(app).get('/v1/fragments').set('Authorization', authHeader());
+
+    expect(res.statusCode).toBe(200);
+    // Each item should be a string (ID), not an object
+    res.body.fragments.forEach((item) => expect(typeof item).toBe('string'));
+  });
 });

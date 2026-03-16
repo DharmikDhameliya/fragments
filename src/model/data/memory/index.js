@@ -1,11 +1,10 @@
-// src/model/data/memory/index.js
-
 const {
   writeFragment,
   readFragment,
   listFragments,
   writeFragmentData,
   readFragmentData,
+  deleteFragment,
 } = require('./memory-db');
 
 module.exports = {
@@ -14,4 +13,5 @@ module.exports = {
   readFragmentData,
   writeFragmentData,
   listFragments,
+  deleteFragment,
 };

@@ -72,4 +72,15 @@ module.exports = {
   listFragments,
   writeFragmentData,
   readFragmentData,
+  deleteFragment,
 };
+
+function deleteFragment(ownerId, id) {
+  if (data[ownerId] && data[ownerId][id]) {
+    delete data[ownerId][id];
+  }
+  if (rawData[ownerId] && rawData[ownerId][id]) {
+    delete rawData[ownerId][id];
+  }
+  return Promise.resolve();
+}
