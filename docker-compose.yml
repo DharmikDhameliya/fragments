@@ -1,0 +1,38 @@
+services:
+  # 1. Fragments microservice API server
+  fragments:
+    init: true
+    build: .
+    environment:
+      - API_URL=http://localhost:8080
+      - HTPASSWD_FILE=tests/.htpasswd
+      - FRAGMENTS_LOG_LEVEL=${FRAGMENTS_LOG_LEVEL:-info}
+      - NODE_ENV=development
+      - AWS_REGION=us-east-2
+      # Use Docker's internal network to talk to other containers
+      - AWS_S3_ENDPOINT_URL=http://localstack:4566
+      - AWS_DYNAMODB_ENDPOINT_URL=http://dynamodb-local:8000
+      - AWS_S3_BUCKET_NAME=${AWS_S3_BUCKET_NAME:-fragments}
+      - AWS_DYNAMODB_TABLE_NAME=${AWS_DYNAMODB_TABLE_NAME:-fragments}
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+    ports:
+      - '8080:8080'
+
+  # 2. DynamoDB Local (Mocking AWS DynamoDB)
+  dynamodb-local:
+    image: amazon/dynamodb-local
+    ports:
+      - '8000:8000'
+    command: ['-jar', 'DynamoDBLocal.jar', '-inMemory']
+
+  # 3. LocalStack (Mocking AWS S3)
+  localstack:
+    image: localstack/localstack
+    ports:
+      - '4566:4566'
+    environment:
+      - SERVICES=s3
+      - DEFAULT_REGION=us-east-2
+      - LOCALSTACK_AUTH_TOKEN=ignore
+      - LOCALSTACK_ACKNOWLEDGE_ACCOUNT_REQUIREMENT=1

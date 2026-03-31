@@ -1,5 +1,14 @@
 // src/model/data/index.js
 
-// For now, we only have the memory strategy.
-// In Assignment 2, we will add logic to switch based on environment variables.
-module.exports = require('./memory');
+const logger = require('../../logger');
+
+// If the environment sets an AWS Region, we'll use AWS storage
+// services (S3, DynamoDB); otherwise, we'll use an in-memory db.
+module.exports = (() => {
+  if (process.env.AWS_REGION) {
+    logger.info('Using AWS storage');
+    return require('./aws');
+  }
+  logger.warn('No AWS_REGION set. Using MemoryDB');
+  return require('./memory');
+})();
