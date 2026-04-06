@@ -19,7 +19,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v4
         with:
-          node-version: 'lts/*'
+          node-version: '20'
           cache: 'npm'
 
       - name: Install node dependencies
@@ -44,6 +44,12 @@ jobs:
     name: Unit Tests
     runs-on: ubuntu-latest
 
+    services:
+      dynamodb-local:
+        image: amazon/dynamodb-local:latest
+        ports:
+          - 8000:8000
+
     env:
       AWS_REGION: us-east-1
       AWS_ACCESS_KEY_ID: test
@@ -52,12 +58,6 @@ jobs:
       AWS_DYNAMODB_TABLE_NAME: fragments
       AWS_DYNAMODB_ENDPOINT_URL: http://localhost:8000
 
-    services:
-      dynamodb-local:
-        image: amazon/dynamodb-local:latest
-        ports:
-          - 8000:8000
-
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -65,7 +65,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v4
         with:
-          node-version: 'lts/*'
+          node-version: '20'
           cache: 'npm'
 
       - name: Install node dependencies
