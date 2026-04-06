@@ -43,6 +43,7 @@ jobs:
   unit-tests:
     name: Unit Tests
     runs-on: ubuntu-latest
+
     env:
       AWS_REGION: us-east-1
       AWS_ACCESS_KEY_ID: test
@@ -69,6 +70,47 @@ jobs:
 
       - name: Install node dependencies
         run: npm ci
+
+      - name: Wait for DynamoDB Local
+        run: |
+          for i in {1..30}; do
+            if curl -s http://localhost:8000 > /dev/null; then
+              echo "DynamoDB ready"
+              break
+            fi
+            echo "Waiting..."
+            sleep 2
+          done
+
+      - name: Create DynamoDB table
+        run: |
+          node -e "
+          const { DynamoDBClient, CreateTableCommand } = require('@aws-sdk/client-dynamodb');
+          const client = new DynamoDBClient({
+            region: 'us-east-1',
+            endpoint: 'http://localhost:8000',
+            credentials: { accessKeyId: 'test', secretAccessKey: 'test' }
+          });
+          (async () => {
+            try {
+              await client.send(new CreateTableCommand({
+                TableName: 'fragments',
+                AttributeDefinitions: [
+                  { AttributeName: 'ownerId', AttributeType: 'S' },
+                  { AttributeName: 'id', AttributeType: 'S' }
+                ],
+                KeySchema: [
+                  { AttributeName: 'ownerId', KeyType: 'HASH' },
+                  { AttributeName: 'id', KeyType: 'RANGE' }
+                ],
+                BillingMode: 'PAY_PER_REQUEST'
+              }));
+              console.log('Table created successfully');
+            } catch (e) {
+              console.log('Table already exists or error:', e.message);
+            }
+          })();
+          "
 
       - name: Run tests
         run: npm test
