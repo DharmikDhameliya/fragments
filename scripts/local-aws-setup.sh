@@ -33,3 +33,4 @@ dynamodb create-table \
 # Wait until the table exists
 aws --endpoint-url=http://localhost:8000 dynamodb wait table-exists --table-name fragments
 echo "DynamoDB Table Ready"
+

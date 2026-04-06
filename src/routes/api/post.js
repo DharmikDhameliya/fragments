@@ -17,6 +17,22 @@ module.exports = async (req, res) => {
       });
     }
 
+    // Reject wrapped JSON like { data: '...' } — fragments must be raw data
+    if (
+      contentType === 'application/json' &&
+      req.body &&
+      typeof req.body === 'object' &&
+      'data' in req.body
+    ) {
+      return res.status(415).json({
+        status: 'error',
+        error: {
+          message: 'Invalid fragment: JSON must be raw data, not a wrapped object',
+          code: 415,
+        },
+      });
+    }
+
     // Normalize body: express.json() gives an object, express.raw() gives a Buffer
     // We always store data as a Buffer
     let data;
