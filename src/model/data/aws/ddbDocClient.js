@@ -11,24 +11,28 @@ const getCredentials = () => {
       accessKeyId: process.env.AWS_ACCESS_KEY_ID,
       secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
     };
-    logger.debug('Using extra DynamoDB Credentials');
+    logger.debug('Using DynamoDB credentials from environment');
     return credentials;
   }
+  return undefined;
 };
 
 const getDynamoDBEndpoint = () => {
-  if (process.env.AWS_DYNAMODB_ENDPOINT_URL) {
-    logger.debug(
-      { endpoint: process.env.AWS_DYNAMODB_ENDPOINT_URL },
-      'Using alternate DynamoDB endpoint'
-    );
-    return process.env.AWS_DYNAMODB_ENDPOINT_URL;
+  const endpoint =
+    process.env.AWS_DYNAMODB_ENDPOINT || // ✅ CI uses this
+    process.env.AWS_DYNAMODB_ENDPOINT_URL; // ✅ fallback (your old one)
+
+  if (endpoint) {
+    logger.debug({ endpoint }, 'Using alternate DynamoDB endpoint');
+    return endpoint;
   }
+
+  return undefined;
 };
 
 const ddbClient = new DynamoDBClient({
-  region: process.env.AWS_REGION,
-  endpoint: getDynamoDBEndpoint(),
+  region: process.env.AWS_REGION || 'us-east-2', // ✅ fallback added
+  endpoint: getDynamoDBEndpoint(), // ✅ FIXED
   credentials: getCredentials(),
 });
 
