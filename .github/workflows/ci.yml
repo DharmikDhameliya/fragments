@@ -63,7 +63,6 @@ jobs:
       - run: npm ci
 
       - name: Wait for DynamoDB
-        shell: bash
         run: |
           for i in {1..30}; do
             if curl -s http://localhost:8000 > /dev/null; then
@@ -74,7 +73,6 @@ jobs:
           done
 
       - name: Create DynamoDB table
-        shell: bash
         run: |
           node -e "
           const { DynamoDBClient, CreateTableCommand } = require('@aws-sdk/client-dynamodb');
@@ -99,7 +97,7 @@ jobs:
               }));
               console.log('Table created');
             } catch (e) {
-              console.log('Table exists:', e.message);
+              console.log('Table exists');
             }
           })();
           "
@@ -134,7 +132,6 @@ jobs:
       - run: npm ci
 
       - name: Install Hurl
-        shell: bash
         run: |
           curl -LO https://github.com/Orange-OpenSource/hurl/releases/download/4.1.0/hurl_4.1.0_amd64.deb
           sudo dpkg -i hurl_4.1.0_amd64.deb
@@ -143,7 +140,6 @@ jobs:
         run: docker compose up -d --build
 
       - name: Wait for LocalStack
-        shell: bash
         run: |
           for i in {1..30}; do
             if curl -s http://localhost:4566/_localstack/health | grep -q '"s3"'; then
@@ -154,7 +150,6 @@ jobs:
           done
 
       - name: Wait for DynamoDB
-        shell: bash
         run: |
           for i in {1..30}; do
             if curl -s http://localhost:8000 > /dev/null; then
@@ -165,11 +160,8 @@ jobs:
           done
 
       - name: Setup AWS resources
-        shell: bash
         run: |
           set +e
-
-          aws --version
 
           aws s3 mb s3://fragments \
             --endpoint-url http://localhost:4566 \
@@ -186,15 +178,19 @@ jobs:
           set -e
 
       - name: Wait for fragments service
-        shell: bash
         run: |
+          echo "Waiting for fragments service..."
           for i in {1..30}; do
-            if curl -s http://localhost:3000/v1/health > /dev/null; then
+            if curl -s http://localhost:8080/ | grep -q "ok"; then
               echo "Fragments ready"
-              break
+              exit 0
             fi
-            sleep 3
+            sleep 2
           done
+
+          echo "Fragments failed to start!"
+          docker compose logs fragments
+          exit 1
 
       - name: Run Hurl tests
         run: npx hurl --test tests/integration/lab-10-dynamodb.hurl
