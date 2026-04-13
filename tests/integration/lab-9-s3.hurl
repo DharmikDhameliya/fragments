@@ -1,9 +1,12 @@
 # tests/integration/lab-9-s3.hurl
 
 # 1. POST a new text fragment
-POST http://localhost:8080/v1/fragments
-Authorization: Basic dGVzdC11c2VyMUBmcmFnbWVudHMtdGVzdGluZy5jb206cGFzc3dvcmQx
+POST http://localhost:3000/v1/fragments
 Content-Type: text/plain
+
+[BasicAuth]
+test-user1@fragments-testing.com:password1
+
 file,body.txt;
 
 HTTP/1.1 201
@@ -14,7 +17,9 @@ url: header "Location"
 
 # 2. GET the fragment
 GET {{url}}
-Authorization: Basic dGVzdC11c2VyMUBmcmFnbWVudHMtdGVzdGluZy5jb206cGFzc3dvcmQx
+
+[BasicAuth]
+test-user1@fragments-testing.com:password1
 
 HTTP/1.1 200
 Content-Type: text/plain
@@ -23,7 +28,9 @@ Content-Type: text/plain
 
 # 3. DELETE the fragment
 DELETE {{url}}
-Authorization: Basic dGVzdC11c2VyMUBmcmFnbWVudHMtdGVzdGluZy5jb206cGFzc3dvcmQx
+
+[BasicAuth]
+test-user1@fragments-testing.com:password1
 
 HTTP/1.1 200
 

@@ -3,7 +3,7 @@
 const s3Client = require('./s3Client');
 const { PutObjectCommand, GetObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
 const { PutCommand, GetCommand, QueryCommand, DeleteCommand } = require('@aws-sdk/lib-dynamodb');
-const ddbDocClient = require('./ddbDocClient');
+const { ddbDocClient } = require('./ddbDocClient');
 const logger = require('../../../logger');
 
 // Convert a stream of data into a Buffer

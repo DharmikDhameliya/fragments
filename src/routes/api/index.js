@@ -1,4 +1,5 @@
 // src/routes/api/index.js
+console.log('LOADING API ROUTES');
 const express = require('express');
 const contentType = require('content-type');
 const { Fragment } = require('../../model/fragment');

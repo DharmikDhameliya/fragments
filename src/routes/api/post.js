@@ -1,8 +1,10 @@
 // src/routes/api/post.js
+console.log('LOADING POST ROUTE');
 const { Fragment } = require('../../model/fragment');
 const logger = require('../../logger');
 
 module.exports = async (req, res) => {
+  console.log('POST /fragments called');
   try {
     const contentType = req.get('Content-Type');
 

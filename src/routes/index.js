@@ -11,6 +11,7 @@ const { createSuccessResponse } = require('../response');
 
 // Health check (no auth required)
 router.get('/', (req, res) => {
+  console.log('HEALTH CHECK REQUEST');
   // Client should not cache this response
   res.setHeader('Cache-Control', 'no-cache');
 
@@ -26,6 +27,17 @@ router.get('/', (req, res) => {
 });
 
 // All /v1 routes require authentication
-router.use('/v1', authenticate(), require('./api'));
+console.log('SETTING UP /v1 ROUTES WITH AUTH');
+const authMiddleware = authenticate();
+console.log('AUTH MIDDLEWARE:', typeof authMiddleware);
+router.use(
+  '/v1',
+  (req, res, next) => {
+    console.log('/v1 REQUEST:', req.method, req.url);
+    next();
+  },
+  authMiddleware,
+  require('./api')
+);
 
 module.exports = router;

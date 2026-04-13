@@ -1,5 +1,5 @@
 # Authenticated POST to /v1/fragments
-POST http://localhost:8080/v1/fragments
+POST http://localhost:3000/v1/fragments
 # We're sending a plain text fragment
 Content-Type: text/plain
 # Include HTTP Basic Auth credentials
@@ -14,7 +14,7 @@ test-user1@fragments-testing.com:password1
 HTTP/1.1 201
 [Asserts]
 # The Location header should contain the URL to the new fragment
-header "Location" matches "^http:\/\/localhost:8080\/v1\/fragments\/[A-Za-z0-9_-]+$"
+header "Location" matches "^http:\/\/localhost:3000\/v1\/fragments\/[A-Za-z0-9_-]+$"
 jsonpath "$.status" == "ok"
 # Check that the fragment ID is a valid nanoid
 jsonpath "$.fragment.id" matches "^[A-Za-z0-9_-]+$"

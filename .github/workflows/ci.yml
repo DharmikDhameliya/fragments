@@ -50,6 +50,7 @@ jobs:
       AWS_S3_BUCKET_NAME: fragments
       AWS_DYNAMODB_TABLE_NAME: fragments
       AWS_DYNAMODB_ENDPOINT: http://localhost:8000
+      AWS_DYNAMODB_ENDPOINT_URL: http://localhost:8000
 
     steps:
       - uses: actions/checkout@v4
@@ -62,6 +63,7 @@ jobs:
       - run: npm ci
 
       - name: Wait for DynamoDB
+        shell: bash
         run: |
           for i in {1..30}; do
             if curl -s http://localhost:8000 > /dev/null; then
@@ -72,6 +74,7 @@ jobs:
           done
 
       - name: Create DynamoDB table
+        shell: bash
         run: |
           node -e "
           const { DynamoDBClient, CreateTableCommand } = require('@aws-sdk/client-dynamodb');
@@ -114,10 +117,11 @@ jobs:
       AWS_SECRET_ACCESS_KEY: test
       AWS_S3_BUCKET_NAME: fragments
       AWS_DYNAMODB_TABLE_NAME: fragments
-
-      # ✅ CRITICAL FIX
       AWS_DYNAMODB_ENDPOINT: http://dynamodb-local:8000
+      AWS_DYNAMODB_ENDPOINT_URL: http://dynamodb-local:8000
       AWS_S3_ENDPOINT: http://localstack:4566
+      AWS_S3_ENDPOINT_URL: http://localstack:4566
+      HTPASSWD_FILE: /app/.htpasswd
 
     steps:
       - uses: actions/checkout@v4
@@ -130,6 +134,7 @@ jobs:
       - run: npm ci
 
       - name: Install Hurl
+        shell: bash
         run: |
           curl -LO https://github.com/Orange-OpenSource/hurl/releases/download/4.1.0/hurl_4.1.0_amd64.deb
           sudo dpkg -i hurl_4.1.0_amd64.deb
@@ -138,6 +143,7 @@ jobs:
         run: docker compose up -d --build
 
       - name: Wait for LocalStack
+        shell: bash
         run: |
           for i in {1..30}; do
             if curl -s http://localhost:4566/_localstack/health | grep -q '"s3"'; then
@@ -148,6 +154,7 @@ jobs:
           done
 
       - name: Wait for DynamoDB
+        shell: bash
         run: |
           for i in {1..30}; do
             if curl -s http://localhost:8000 > /dev/null; then
@@ -157,13 +164,18 @@ jobs:
             sleep 2
           done
 
-      # ✅ CREATE RESOURCES INSIDE DOCKER
       - name: Setup AWS resources
+        shell: bash
         run: |
-          docker compose exec -T localstack awslocal s3 mb s3://fragments || true
+          set +e
 
-          docker compose exec -T dynamodb-local \
-            aws dynamodb create-table \
+          aws --version
+
+          aws s3 mb s3://fragments \
+            --endpoint-url http://localhost:4566 \
+            --region us-east-1 || true
+
+          aws dynamodb create-table \
             --table-name fragments \
             --attribute-definitions AttributeName=ownerId,AttributeType=S AttributeName=id,AttributeType=S \
             --key-schema AttributeName=ownerId,KeyType=HASH AttributeName=id,KeyType=RANGE \
@@ -171,10 +183,13 @@ jobs:
             --endpoint-url http://localhost:8000 \
             --region us-east-1 || true
 
+          set -e
+
       - name: Wait for fragments service
+        shell: bash
         run: |
           for i in {1..30}; do
-            if curl -s http://localhost:8080/v1/health > /dev/null; then
+            if curl -s http://localhost:3000/v1/health > /dev/null; then
               echo "Fragments ready"
               break
             fi

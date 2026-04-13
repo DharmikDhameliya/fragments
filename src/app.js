@@ -1,5 +1,7 @@
 // src/app.js
 
+console.log('STARTING APP.JS');
+
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -28,13 +30,13 @@ app.use(cors());
 app.use(compression());
 
 // Use our auth strategy (Cognito in prod, Basic Auth in tests/dev)
-app.use(auth.strategy());
+// app.use(auth.strategy()); // Removed global auth - applied at route level
 
 // Simple logging middleware
 app.use((req, res, next) => {
-  console.log(`${req.method} ${req.url} - Pending`);
+  console.log(`REQUEST: ${req.method} ${req.url}`);
   res.on('finish', () => {
-    console.log(`${req.method} ${req.url} - ${res.statusCode}`);
+    console.log(`RESPONSE: ${req.method} ${req.url} - ${res.statusCode}`);
   });
   next();
 });
@@ -45,6 +47,7 @@ app.use(
 );
 
 // Define our routes
+console.log('MOUNTING ROUTES');
 app.use('/', require('./routes'));
 
 // Add 404 middleware to handle any requests for resources that can't be found

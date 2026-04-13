@@ -12,17 +12,23 @@ const getCredentials = () => {
     logger.debug('Using extra S3 Credentials AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY');
     return credentials;
   }
+
+  return undefined;
 };
 
 const getS3Endpoint = () => {
-  if (process.env.AWS_S3_ENDPOINT_URL) {
-    logger.debug({ endpoint: process.env.AWS_S3_ENDPOINT_URL }, 'Using alternate S3 endpoint');
-    return process.env.AWS_S3_ENDPOINT_URL;
+  const endpoint = process.env.AWS_S3_ENDPOINT || process.env.AWS_S3_ENDPOINT_URL;
+
+  if (endpoint) {
+    logger.debug({ endpoint }, 'Using alternate S3 endpoint');
+    return endpoint;
   }
+
+  return undefined;
 };
 
 module.exports = new S3Client({
-  region: process.env.AWS_REGION,
+  region: process.env.AWS_REGION || 'us-east-1',
   credentials: getCredentials(),
   endpoint: getS3Endpoint(),
   forcePathStyle: true,
