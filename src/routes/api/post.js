@@ -6,7 +6,6 @@ module.exports = async (req, res) => {
   try {
     const contentType = req.get('Content-Type');
 
-    // Validate the Content-Type is supported before doing anything else
     if (!Fragment.isSupportedType(contentType)) {
       return res.status(415).json({
         status: 'error',
@@ -17,7 +16,6 @@ module.exports = async (req, res) => {
       });
     }
 
-    // Reject wrapped JSON like { data: '...' } — fragments must be raw data
     if (
       contentType === 'application/json' &&
       req.body &&
@@ -33,13 +31,10 @@ module.exports = async (req, res) => {
       });
     }
 
-    // Normalize body: express.json() gives an object, express.raw() gives a Buffer
-    // We always store data as a Buffer
     let data;
     if (Buffer.isBuffer(req.body)) {
       data = req.body;
     } else if (req.body !== undefined) {
-      // JSON body — serialize back to a Buffer
       data = Buffer.from(JSON.stringify(req.body));
     } else {
       return res.status(400).json({
@@ -48,30 +43,32 @@ module.exports = async (req, res) => {
       });
     }
 
-    // Create a new Fragment object
+    // ✅ FIX: ensure ownerId is a STRING
+    const ownerId =
+      typeof req.user === 'string' ? req.user : req.user?.id || JSON.stringify(req.user);
+
     const fragment = new Fragment({
-      ownerId: req.user,
+      ownerId, // ✅ FIXED
       type: contentType,
       size: data.length,
     });
 
-    // Save metadata and data
     await fragment.save();
     await fragment.setData(data);
 
     logger.info({ fragment }, 'Fragment created successfully');
 
-    // Build the Location header URL using API_URL env var or fallback to request host
     const apiUrl = process.env.API_URL || `${req.protocol}://${req.headers.host}`;
     res.location(`${apiUrl}/v1/fragments/${fragment.id}`);
 
-    // Respond with 201 Created
     res.status(201).json({
       status: 'ok',
       fragment: fragment,
     });
   } catch (err) {
+    console.error('POST ERROR:', err); // ✅ extra debug
     logger.error({ err }, 'Error in POST /fragments');
+
     res.status(500).json({
       status: 'error',
       error: {

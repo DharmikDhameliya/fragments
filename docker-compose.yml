@@ -9,24 +9,33 @@ services:
       - FRAGMENTS_LOG_LEVEL=${FRAGMENTS_LOG_LEVEL:-info}
       - NODE_ENV=development
       - AWS_REGION=us-east-2
-      # Use Docker's internal network to talk to other containers
+
+      # ✅ FIX: support both env names
+      - AWS_S3_ENDPOINT=http://localstack:4566
+      - AWS_DYNAMODB_ENDPOINT=http://dynamodb-local:8000
+
+      # (keep compatibility with your code)
       - AWS_S3_ENDPOINT_URL=http://localstack:4566
       - AWS_DYNAMODB_ENDPOINT_URL=http://dynamodb-local:8000
+
       - AWS_S3_BUCKET_NAME=${AWS_S3_BUCKET_NAME:-fragments}
       - AWS_DYNAMODB_TABLE_NAME=${AWS_DYNAMODB_TABLE_NAME:-fragments}
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test
     ports:
       - '8080:8080'
+    depends_on:
+      - dynamodb-local
+      - localstack
 
-  # 2. DynamoDB Local (Mocking AWS DynamoDB)
+  # 2. DynamoDB Local
   dynamodb-local:
     image: amazon/dynamodb-local
     ports:
       - '8000:8000'
-    command: ['-jar', 'DynamoDBLocal.jar', '-inMemory']
+    command: ['-jar', 'DynamoDBLocal.jar', '-sharedDb', '-inMemory'] # ✅ FIXED
 
-  # 3. LocalStack (Mocking AWS S3)
+  # 3. LocalStack (S3)
   localstack:
     image: localstack/localstack:3.0.2
     ports:
