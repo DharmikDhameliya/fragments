@@ -3,15 +3,11 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../auth');
-
-// Import version and author from package.json
 const { version, author } = require('../../package.json');
-// Import our response helper
 const { createSuccessResponse } = require('../response');
 
 /**
- * Public Health Check Routes
- * These must stay ABOVE the authenticate() middleware
+ * Public Routes (No Auth Required)
  */
 
 // Root health check
@@ -26,7 +22,7 @@ router.get('/', (req, res) => {
   );
 });
 
-// Explicit v1 health check (Public)
+// v1 health check (Public to allow ALB/Demo health checks)
 router.get('/v1/health', (req, res) => {
   res.setHeader('Cache-Control', 'no-cache');
   res.status(200).json(
@@ -38,10 +34,8 @@ router.get('/v1/health', (req, res) => {
 });
 
 /**
- * Authenticated Routes
+ * Protected Routes (/v1)
  */
-
-console.log('SETTING UP /v1 ROUTES WITH AUTH');
 const authMiddleware = authenticate();
 
 router.use(
