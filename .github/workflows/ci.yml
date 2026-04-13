@@ -139,15 +139,27 @@ jobs:
       - name: Start containers
         run: docker compose up -d --build
 
-      - name: Wait for LocalStack
+      # ✅ FIX 1: wait for networking
+      - name: Initial wait
+        run: sleep 5
+
+      # ✅ FIX 2: strong LocalStack readiness check
+      - name: Wait for LocalStack (fully ready)
         run: |
+          echo "Waiting for LocalStack..."
           for i in {1..30}; do
-            if curl -s http://localhost:4566/_localstack/health | grep -q '"s3"'; then
-              echo "LocalStack ready"
-              break
+            if curl -s http://localhost:4566/_localstack/health | grep -q '"initialized": true'; then
+              echo "LocalStack fully ready!"
+              sleep 5
+              exit 0
             fi
+            echo "Retry $i..."
             sleep 3
           done
+
+          echo "LocalStack failed!"
+          docker compose logs localstack
+          exit 1
 
       - name: Wait for DynamoDB
         run: |
