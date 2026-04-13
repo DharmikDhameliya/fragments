@@ -13,6 +13,7 @@ const pino = require('pino-http')({
 });
 
 const { createErrorResponse } = require('./response');
+const auth = require('./auth'); // ← ADD THIS
 
 const app = express();
 
@@ -28,6 +29,9 @@ app.use(cors());
 // Use gzip/deflate compression middleware
 app.use(compression());
 
+// Initialize Passport strategy (Cognito JWT or HTTP Basic Auth)
+app.use(auth.strategy()); // ← ADD THIS
+
 // Simple logging middleware
 app.use((req, res, next) => {
   console.log(`REQUEST: ${req.method} ${req.url}`);
@@ -37,7 +41,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Parse raw text bodies for any text/* fragment type (e.g., text/plain, text/markdown, text/html)
+// Parse raw text bodies
 app.use(
   express.raw({ type: ['text/*', 'image/*', 'application/octet-stream', 'application/json'] })
 );
@@ -46,12 +50,12 @@ app.use(
 console.log('MOUNTING ROUTES');
 app.use('/', require('./routes'));
 
-// Add 404 middleware to handle any requests for resources that can't be found
+// 404 handler
 app.use((req, res) => {
   res.status(404).json(createErrorResponse(404, 'not found'));
 });
 
-// Add error-handling middleware to deal with anything else
+// Error handler
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
   const status = err.status || 500;
