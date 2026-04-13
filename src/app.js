@@ -12,7 +12,6 @@ const pino = require('pino-http')({
   logger,
 });
 
-const auth = require('./auth');
 const { createErrorResponse } = require('./response');
 
 const app = express();
@@ -28,9 +27,6 @@ app.use(cors());
 
 // Use gzip/deflate compression middleware
 app.use(compression());
-
-// Use our auth strategy (Cognito in prod, Basic Auth in tests/dev)
-// app.use(auth.strategy()); // Removed global auth - applied at route level
 
 // Simple logging middleware
 app.use((req, res, next) => {
