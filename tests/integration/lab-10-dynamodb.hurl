@@ -1,9 +1,7 @@
 # 1. POST a new JSON fragment
 POST http://localhost:8080/v1/fragments
 Content-Type: application/json
-
-[BasicAuth]
-test-user1@fragments-testing.com:password1
+Authorization: Basic dGVzdC11c2VyMUBmcmFnbWVudHMtdGVzdGluZy5jb206cGFzc3dvcmQx
 
 {"service":"DynamoDB"}
 
@@ -24,9 +22,7 @@ jsonpath "$.fragment.size" == 22
 
 # 2. GET the fragment info
 GET {{fragment1_url}}/info
-
-[BasicAuth]
-test-user1@fragments-testing.com:password1
+Authorization: Basic dGVzdC11c2VyMUBmcmFnbWVudHMtdGVzdGluZy5jb206cGFzc3dvcmQx
 
 HTTP/1.1 200
 
@@ -40,11 +36,9 @@ jsonpath "$.fragment.type" == "application/json"
 jsonpath "$.fragment.size" == 22
 
 # 3. POST a second Markdown fragment 
-POST http://localhost:3000/v1/fragments
+POST http://localhost:8080/v1/fragments
 Content-Type: text/markdown
-
-[BasicAuth]
-test-user1@fragments-testing.com:password1
+Authorization: Basic dGVzdC11c2VyMUBmcmFnbWVudHMtdGVzdGluZy5jb206cGFzc3dvcmQx
 
 `DynamoDB notes`
 
@@ -79,7 +73,7 @@ jsonpath "$.fragment.type" == "text/markdown"
 jsonpath "$.fragment.size" == 14
 
 # 5. GET all fragments
-GET http://localhost:3000/v1/fragments
+GET http://localhost:8080/v1/fragments
 Authorization: Basic dGVzdC11c2VyMUBmcmFnbWVudHMtdGVzdGluZy5jb206cGFzc3dvcmQx
 
 HTTP/1.1 200
@@ -104,7 +98,7 @@ Authorization: Basic dGVzdC11c2VyMUBmcmFnbWVudHMtdGVzdGluZy5jb206cGFzc3dvcmQx
 HTTP/1.1 404
 
 # 8. GET all fragments - fragment1 gone, fragment2 remains
-GET http://localhost:3000/v1/fragments
+GET http://localhost:8080/v1/fragments
 Authorization: Basic dGVzdC11c2VyMUBmcmFnbWVudHMtdGVzdGluZy5jb206cGFzc3dvcmQx
 
 HTTP/1.1 200
