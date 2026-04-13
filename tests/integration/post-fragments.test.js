@@ -35,8 +35,8 @@ describe('POST /v1/fragments', () => {
     const res = await request(app)
       .post('/v1/fragments')
       .set('Authorization', authHeader())
-      .set('Content-Type', 'application/json')
-      .send({ data: 'not allowed' });
+      .set('Content-Type', 'application/xml')
+      .send('<data>not allowed</data>');
 
     expect(res.status).toBe(415);
   });

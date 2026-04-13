@@ -1,0 +1,26 @@
+[
+  {
+    "name": "fragments",
+    "image": "577018704849.dkr.ecr.us-east-2.amazonaws.com/fragments:latest",
+    "essential": true,
+    "portMappings": [
+      { "containerPort": 8080, "hostPort": 8080, "protocol": "tcp" }
+    ],
+    "environment": [
+      { "name": "AWS_REGION", "value": "us-east-2" },
+      { "name": "AWS_S3_BUCKET_NAME", "value": "ddhameliya05-fragments" },
+      { "name": "AWS_DYNAMODB_TABLE_NAME", "value": "fragments" },
+      { "name": "NODE_ENV", "value": "production" },
+      { "name": "AWS_COGNITO_POOL_ID", "value": "us-east-2_z1DH9mvd1" },
+      { "name": "AWS_COGNITO_CLIENT_ID", "value": "6u95mvmcl6cepf5lbdct0i3m1n" }
+    ],
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "/ecs/fragments",
+        "awslogs-region": "us-east-2",
+        "awslogs-stream-prefix": "ecs"
+      }
+    }
+  }
+]

@@ -11,7 +11,7 @@ services:
       - AWS_REGION=us-east-2
       # Use Docker's internal network to talk to other containers
       - AWS_S3_ENDPOINT_URL=http://localstack:4566
-      - AWS_DYNAMODB_ENDPOINT_URL=http://host.docker.internal:8000
+      - AWS_DYNAMODB_ENDPOINT_URL=http://dynamodb-local:8000
       - AWS_S3_BUCKET_NAME=${AWS_S3_BUCKET_NAME:-fragments}
       - AWS_DYNAMODB_TABLE_NAME=${AWS_DYNAMODB_TABLE_NAME:-fragments}
       - AWS_ACCESS_KEY_ID=test

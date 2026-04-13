@@ -39,11 +39,10 @@ app.use((req, res, next) => {
   next();
 });
 
-// Parse JSON bodies (for application/json fragments)
-app.use(express.json());
-
 // Parse raw text bodies for any text/* fragment type (e.g., text/plain, text/markdown, text/html)
-app.use(express.raw({ type: 'text/*' }));
+app.use(
+  express.raw({ type: ['text/*', 'image/*', 'application/octet-stream', 'application/json'] })
+);
 
 // Define our routes
 app.use('/', require('./routes'));
