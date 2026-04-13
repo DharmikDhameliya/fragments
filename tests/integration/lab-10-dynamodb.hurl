@@ -1,5 +1,5 @@
 # 1. POST a new JSON fragment
-POST http://localhost:3000/v1/fragments
+POST http://localhost:8080/v1/fragments
 Content-Type: application/json
 
 [BasicAuth]
